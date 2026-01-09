@@ -1,53 +1,84 @@
-# AMMS - Unified Approximate Matrix Multiplication
+# SAGE-AMMS - Approximate Matrix Multiplication Algorithms
 
-> **Important**: AMM C++ implementations and PyAMM bindings are being moved to an **independent
-> repository/package** (`isage-amms`, planned repo `intellistream/sage-amms`). The SAGE repo now only
-> ships the Python interface/registry to keep APIs stable. Install the external package to actually
-> use AMM algorithms.
+[![PyPI version](https://badge.fury.io/py/isage-amms.svg)](https://badge.fury.io/py/isage-amms)
+[![Build Status](https://github.com/intellistream/sage-amms/workflows/Build%20and%20Test/badge.svg)](https://github.com/intellistream/sage-amms/actions)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-**Status**: 🚀 Active Development (externalized)\
-**PyPI Package**: `isage-amms`
+> Independent C++ implementation package for Approximate Matrix Multiplication (AMM) algorithms, extracted from the [SAGE project](https://github.com/intellistream/SAGE).
 
-This directory consolidates all AMM (Approximate Matrix Multiplication) algorithm code into a single
-unified location.
+**Status**: 🚀 Active Development
+**PyPI Package**: [`isage-amms`](https://pypi.org/project/isage-amms/)
+**Parent Project**: [SAGE - Unified ML System](https://github.com/intellistream/SAGE)
+
+## Overview
+
+SAGE-AMMS provides high-performance C++ implementations of various approximate matrix multiplication algorithms with Python bindings. This package was extracted from the main SAGE repository to:
+
+- ✅ Enable independent versioning and releases
+- ✅ Reduce main SAGE repository size
+- ✅ Allow optional installation
+- ✅ Simplify CI/CD for C++ builds
+- ✅ Make AMM algorithms reusable in other projects
 
 ## Quick Start
 
-### Installation from PyPI
+### Installation
+
+#### From PyPI (Recommended)
 
 ```bash
 pip install isage-amms
 ```
 
-### Installation from Source
+#### From Source
 
-**Note**: Building from source requires a high-memory machine (64GB+ RAM recommended).
+**Prerequisites**:
+- CMake >= 3.14
+- C++14 compatible compiler
+- Python >= 3.8
+- PyTorch >= 2.0.0
 
 ```bash
-# Clone and navigate to amms directory
-cd packages/sage-libs/src/sage/libs/amms
+# Clone the repository
+git clone https://github.com/intellistream/sage-amms.git
+cd sage-amms
 
-# Quick build (on high-memory machine)
-./quick_build.sh
+# Install in development mode
+pip install -e .
 
-# Install
-pip install dist/isage_amms-*.whl
+# Or build wheel
+python -m build --wheel
+pip install dist/*.whl
 ```
 
 ### Usage
 
+This package provides the algorithm implementations. The unified interface is provided by the main SAGE package:
+
 ```python
+# Install both packages
+# pip install sage isage-amms
+
+# Import from SAGE (provides the interface)
 from sage.libs.amms import create, registered
 
 # Check available algorithms
 print(registered())
+# Output: ['countsketch', 'fastjlt', 'crs', 'bcrs', ...]
 
-# Create an AMM algorithm instance (once implementations are registered)
-# amm = create("countsketch", sketch_size=1000)
-# result = amm.multiply(matrix_a, matrix_b)
+# Create an algorithm instance
+amm = create("countsketch", sketch_size=1000)
+
+# Perform approximate matrix multiplication
+import numpy as np
+A = np.random.randn(1000, 500)
+B = np.random.randn(500, 800)
+result = amm.multiply(A, B)  # Approximate A @ B
 ```
 
-## Overview
+## Architecture
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 
 AMMS provides a unified interface for various approximate matrix multiplication algorithms, similar
 to how ANNS provides a unified interface for approximate nearest neighbor search algorithms.
@@ -55,33 +86,30 @@ to how ANNS provides a unified interface for approximate nearest neighbor search
 ## Structure
 
 ```
-amms/
-├── interface/          # Abstract interfaces
-│   ├── base.py         # AmmIndex, AmmIndexMeta
-│   ├── factory.py      # create(), register(), registered()
-│   └── registry.py     # Algorithm registry
-│
-├── wrappers/           # Python wrappers for AMM algorithms
-│   └── pyamm/          # PyAMM wrapper (from libamm)
-│
-├── implementations/    # C++ source code
-│   ├── include/        # C++ headers
-│   │   ├── CPPAlgos/   # Core AMM algorithm implementations
-│   │   ├── MatrixLoader/
-│   │   ├── Utils/
-│   │   └── ...
-│   ├── src/            # C++ implementation files
-│   │   ├── CPPAlgos/
-│   │   ├── MatrixLoader/
-│   │   └── ...
-│   └── bindings/       # pybind11 bindings
-│
-└── benchmarks/         # Benchmark scripts (moved to sage-benchmark)
+sage-amms/
+├── sage/libs/amms/
+│   ├── __init__.py              # Package initialization
+│   ├── implementations/         # C++ source code
+│   │   ├── include/             # C++ headers
+│   │   │   ├── CPPAlgos/        # Core AMM algorithm implementations
+│   │   │   ├── MatrixLoader/    # Matrix loading utilities
+│   │   │   ├── Utils/           # Utility functions
+│   │   │   └── ...
+│   │   ├── src/                 # C++ implementation files
+│   │   │   ├── CPPAlgos/        # Algorithm implementations
+│   │   │   ├── PyAMM.cpp        # Python bindings
+│   │   │   └── ...
+│   │   └── CMakeLists.txt       # Build configuration
+│   └── wrappers/                # Python wrappers
+│       └── pyamm.py             # PyAMM wrapper
+├── tests/                       # Unit tests
+├── pyproject.toml               # Package metadata
+└── setup.py                     # Build configuration
 ```
 
 ## Algorithms Included
 
-LibAMM provides implementations of various AMM algorithms:
+This package provides implementations of various AMM algorithms:
 
 ### Sketching-based Algorithms
 
@@ -114,112 +142,55 @@ LibAMM provides implementations of various AMM algorithms:
 
 ## Installation
 
-### Quick Install (Recommended for Most Users)
+### From PyPI (Recommended)
 
 ```bash
+# Install CPU-only version
 pip install isage-amms
 ```
 
-This installs the **CPU-only version** with all core AMM algorithms. This is the recommended
-installation for most users as it:
+This installs the **CPU-only version** with all core AMM algorithms.
 
-- ✅ Works on all machines (with or without GPU)
-- ✅ Auto-detects and enables PAPI if available (no extra steps needed)
-- ✅ Smallest package size (~50-100MB)
-- ✅ Compatible with any PyTorch installation
+### From Source
 
-**GPU-accelerated version** (for users with NVIDIA GPUs):
-
-```bash
-# Option 1: Automatic detection (recommended)
-# Step 1: Install PyTorch with CUDA
-pip install torch --index-url https://download.pytorch.org/whl/cu121  # CUDA 12.1
-
-# Step 2: Install isage-amms (CUDA auto-detected from PyTorch)
-pip install isage-amms --no-binary :all:
-
-# Option 2: Force enable CUDA
-ENABLE_CUDA=1 pip install isage-amms --no-binary :all:
-```
-
-**Note**:
-
-- PAPI: If you have `libpapi-dev` installed, PAPI support will be automatically enabled. Otherwise,
-  it will be silently disabled without affecting functionality.
-- CUDA: If your PyTorch installation supports CUDA (`torch.cuda.is_available()`), CUDA will be
-  automatically enabled during build.
-
-### Build Requirements (Source Installation)
-
-For building from source with optional features, you'll need:
-
-- **Compiler**: GCC/G++ 11+ (Ubuntu 22.04+ default)
-- **CMake**: 3.14+
-- **PyTorch**: 2.0.0+
-- **Python**: 3.8-3.12 (3.11 recommended)
-- **Memory**: 64GB+ RAM recommended for building from source
-
-#### Optional Dependencies
-
-- **CUDA** (Optional): For GPU acceleration
-
-  ```bash
-  # CUDA toolkit required
-  sudo apt-get install nvidia-cuda-toolkit
-  ```
-
-- **PAPI** (Optional): For hardware performance counters
-
-  ```bash
-  # Ubuntu/Debian
-  sudo apt-get install libpapi-dev
-
-  # CentOS/RHEL
-  sudo yum install papi-devel
-
-  # Fedora
-  sudo dnf install papi-devel
-  ```
-
-### Advanced Installation Options
-
-#### Hardware Performance Counters
-
-For PAPI hardware performance analysis, simply install `libpapi-dev` before installing isage-amms:
+**Prerequisites**:
+- CMake >= 3.14
+- C++14 compatible compiler (GCC 7+, Clang 5+, MSVC 2017+)
+- Python 3.8-3.12
+- PyTorch >= 2.0.0
+- 64GB+ RAM recommended for building
 
 ```bash
-# Install system library
-sudo apt-get install libpapi-dev
+# Clone repository
+git clone https://github.com/intellistream/sage-amms.git
+cd sage-amms
 
-# PAPI will be auto-detected during installation
-pip install isage-amms --no-binary :all:
-```
-
-**Force enable/disable**:
-
-```bash
-# Force enable (fails if libpapi-dev not installed)
-ENABLE_AMMS_PAPI=1 pip install isage-amms --no-binary :all:
-
-# Force disable
-ENABLE_AMMS_PAPI=0 pip install isage-amms --no-binary :all:
-```
-
-#### Development Installation
-
-For SAGE framework development:
-
-```bash
-git clone https://github.com/intellistream/SAGE.git
-cd SAGE/packages/sage-libs
+# CPU-only build
 pip install -e .
+
+# CUDA-enabled build
+AMMS_ENABLE_CUDA=1 pip install -e .
 ```
 
-This will install in editable mode with automatic CUDA and PAPI detection.
+### Build Options
 
-### Build from Source (High-Memory Machine Required)
+#### CUDA Support
 
-**Important**: Building requires 64GB+ RAM. See [BUILD_PUBLISH.md](BUILD_PUBLISH.md) for detailed
+```bash
+# Enable CUDA
+AMMS_ENABLE_CUDA=1 pip install isage-amms --no-binary :all:
+
+# Specify CUDA path
+CUDA_HOME=/usr/local/cuda AMMS_ENABLE_CUDA=1 pip install isage-amms --no-binary :all:
+```
+
+#### Low Memory Build
+
+For machines with limited RAM:
+
+```bash
+AMMS_LOW_MEMORY_BUILD=1 pip install isage-amms --no-binary :all:
+```
 instructions.
 
 ```bash

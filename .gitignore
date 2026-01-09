@@ -3,6 +3,7 @@ build/
 dist/
 *.egg-info/
 *.egg
+wheelhouse/
 
 # Compiled files
 *.pyc
@@ -12,11 +13,14 @@ dist/
 *.a
 *.dylib
 *.dll
+*.lib
+*.exp
 
 # Python cache
 __pycache__/
 *.py[cod]
 *$py.class
+.Python
 
 # CMake
 CMakeCache.txt
@@ -24,6 +28,14 @@ CMakeFiles/
 cmake_install.cmake
 Makefile
 *.cmake
+!CMakeLists.txt
+install_manifest.txt
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
 
 # IDE
 .vscode/
@@ -31,17 +43,30 @@ Makefile
 *.swp
 *.swo
 *~
+.vs/
 
 # OS
 .DS_Store
 Thumbs.db
+*.bak
 
 # Testing
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
+.tox/
+.hypothesis/
+
+# Documentation
+docs/_build/
+docs/.doctrees/
+site/
 
 # Temporary files
 *.tmp
-*.bak
 *.log
+*.out
+
+# Package files
+pip-wheel-metadata/

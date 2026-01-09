@@ -104,7 +104,7 @@ long_description = readme_path.read_text(encoding="utf-8") if readme_path.exists
 setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
-    ext_modules=[CMakeExtension("PyAMM", sourcedir="implementations")],
+    ext_modules=[CMakeExtension("PyAMM", sourcedir="sage/libs/amms/implementations")],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
 )
