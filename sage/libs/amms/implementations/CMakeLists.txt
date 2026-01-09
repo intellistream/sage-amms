@@ -213,10 +213,31 @@ else ()
     message(STATUS "Using pybind11 ${pybind11_VERSION}")
 
     pybind11_add_module(PyAMM ${PROJECT_SOURCE_DIR}/src/PyAMM.cpp)
-    find_library(TORCH_PYTHON_LIBRARY torch_python PATH "${TORCH_INSTALL_PREFIX}/lib")
-    target_link_libraries(PyAMM PUBLIC ${LIBRARIES} LibAMM ${TORCH_PYTHON_LIBRARY})
+    
+    # Try to find torch_python library with multiple search strategies
+    find_library(TORCH_PYTHON_LIBRARY 
+                 NAMES torch_python libtorch_python
+                 PATHS 
+                     "${TORCH_INSTALL_PREFIX}/lib"
+                     "${Torch_DIR}/../../../lib"
+                     "${CMAKE_PREFIX_PATH}/lib"
+                 NO_DEFAULT_PATH)
+    
+    if(NOT TORCH_PYTHON_LIBRARY)
+        # Fallback: search in system paths
+        find_library(TORCH_PYTHON_LIBRARY 
+                     NAMES torch_python libtorch_python)
+    endif()
+    
+    if(TORCH_PYTHON_LIBRARY)
+        message(STATUS "Found torch_python: ${TORCH_PYTHON_LIBRARY}")
+        target_link_libraries(PyAMM PUBLIC ${LIBRARIES} LibAMM ${TORCH_PYTHON_LIBRARY})
+    else()
+        message(WARNING "torch_python library not found, linking without it (may cause runtime issues)")
+        target_link_libraries(PyAMM PUBLIC ${LIBRARIES} LibAMM)
+    endif()
+    
     install(TARGETS PyAMM LIBRARY DESTINATION .)
-    message(STATUS "Additional include torch_python: ${TORCH_PYTHON_LIBRARY}")
     set(LibAMM_PYBIND 1)
     set_property(TARGET PyAMM PROPERTY CXX_STANDARD 20)
     # 禁用 PyAMM 的 Unity Build，因为它太大容易 OOM
