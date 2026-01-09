@@ -78,7 +78,7 @@ result = amm.multiply(A, B)  # Approximate A @ B
 
 ## Architecture
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
+See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed architecture documentation.
 
 AMMS provides a unified interface for various approximate matrix multiplication algorithms, similar
 to how ANNS provides a unified interface for approximate nearest neighbor search algorithms.

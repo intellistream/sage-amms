@@ -1,11 +1,12 @@
-# Copilot Instructions
+# GitHub Copilot Instructions for sage-amms
 
-## Context
-- Repository: `intellistream/sage-amms`
-- Purpose: Independent AMM (Approximate Matrix Multiplication) operators with C++ implementations and PyBind bindings, published to PyPI as `isage-amms`.
-- Python namespace: `sage.libs.amms`
-- C++ sources live under `sage/libs/amms/implementations`.
-- The unified AMM interface/registry lives in the main SAGE repo, not here.
+## Project Context
+- **Repository**: `intellistream/sage-amms`
+- **PyPI Package**: `isage-amms`
+- **Purpose**: Independent C++ AMM (Approximate Matrix Multiplication) algorithm implementations with PyBind11 bindings
+- **Python Namespace**: `sage.libs.amms`
+- **C++ Sources**: `sage/libs/amms/implementations/`
+- **Important**: The unified AMM interface/registry lives in the main SAGE repo, NOT here. This repo only provides implementations.
 
 ## Coding Guidelines
 - Do NOT add interface/registry code here (that belongs to SAGE main). This repo only hosts implementations, bindings, and wrappers.
@@ -30,3 +31,42 @@
 ## Gotchas
 - Namespace conflicts with installed SAGE main: avoid import-based tests that pull `sage.libs` from elsewhere.
 - Ensure binaries and headers are included via MANIFEST; keep wheel build working for cibuildwheel.
+
+## Directory Structure
+```
+sage-amms/
+├── .github/
+│   ├── COPILOT_INSTRUCTIONS.md  # This file
+│   └── workflows/               # CI/CD workflows
+├── docs/                        # Documentation
+│   ├── ARCHITECTURE.md
+│   ├── CONTRIBUTING.md
+│   ├── PUBLISHING.md
+│   └── ...
+├── scripts/                     # Helper scripts
+│   ├── build.sh
+│   ├── test.sh
+│   └── clean.sh
+├── sage/libs/amms/
+│   ├── __init__.py
+│   ├── implementations/         # C++ source code
+│   └── wrappers/               # Python wrappers
+├── tests/                      # Test suite
+├── pyproject.toml             # Package metadata
+└── setup.py                   # Build configuration
+```
+
+## Quick Commands
+```bash
+# Run tests
+pytest tests/ -v
+
+# Build package
+./scripts/build.sh
+
+# Clean build artifacts
+./scripts/clean.sh
+
+# Run pre-commit hooks
+pre-commit run -a
+```
