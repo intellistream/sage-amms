@@ -29,6 +29,7 @@ cmake_install.cmake
 Makefile
 *.cmake
 !CMakeLists.txt
+!**/cmake/*.cmake
 install_manifest.txt
 
 # Virtual environments
