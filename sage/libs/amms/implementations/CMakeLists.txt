@@ -8,13 +8,13 @@ message(STATUS "=== isage_amms Build Configuration ===")
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "CMAKE_CXX_COMPILER: ${CMAKE_CXX_COMPILER}")
 
-include (cmake/FindCuda.cmake)
-include (cmake/FindTorch.cmake)
-find_package(Torch REQUIRED)
 # Custom CMake find instructions and macros
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
 include(cmake/macros.cmake)
 include(cmake/default.cmake)
+include(cmake/FindCuda.cmake)
+include(cmake/FindTorch.cmake)
+find_package(Torch REQUIRED)
 
 
 # C++ Standard
