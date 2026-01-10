@@ -35,7 +35,7 @@ void LibAMM::TimeStamper::generateEvent() {
                                       timeStamper_zipfEventFactor);
   } else {
     // uint64_t tsGrow = 1000 * timeStepUs / eventRateKTps;
-    eventS = md.genSmoothTimeStamp(testSize, maxTime);
+    eventS = md.genSmoothTimeStamp<uint64_t>(testSize, maxTime);
   }
   INTELLI_INFO("Finish the generation of event time");
 }

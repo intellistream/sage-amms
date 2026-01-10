@@ -31,7 +31,12 @@ message(STATUS "Unity Build enabled with batch size: ${CMAKE_UNITY_BUILD_BATCH_S
 find_package(Torch REQUIRED)
 message(STATUS "Found Torch version: ${Torch_VERSION}")
 message(STATUS "Torch libraries: ${TORCH_LIBRARIES}")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+message(STATUS "Torch include directories: ${TORCH_INCLUDE_DIRS}")
+
+# Add Torch include directories
+include_directories(${TORCH_INCLUDE_DIRS})
+
+# Add Torch libraries
 set(LIBRARIES ${LIBRARIES} ${TORCH_LIBRARIES})
 # Set Optimization Flags
 # 优化内存使用：降低优化级别，减少调试符号，限制编译器内存
