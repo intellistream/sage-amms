@@ -31,7 +31,7 @@ if(NOT TORCH_INCLUDE_DIRS)
     endif()
     execute_process(
         COMMAND "${_PY_EXE}" -c
-            "import torch; print(';'.join(torch.utils.cpp_extension.include_paths()), end='')"
+            "import torch, os; base=os.path.dirname(torch.__file__); print(base+'/include;'+base+'/include/torch/csrc/api/include', end='')"
         OUTPUT_VARIABLE TORCH_INCLUDE_DIRS
         ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -43,8 +43,8 @@ if(NOT TORCH_INCLUDE_DIRS)
     endif()
 endif()
 
-# Add Torch dependencies
-include_directories(${TORCH_INCLUDE_DIRS})
+# Add Torch dependencies; use SYSTEM to suppress warnings from torch headers
+include_directories(SYSTEM ${TORCH_INCLUDE_DIRS})
 set(LIBRARIES ${LIBRARIES} ${TORCH_LIBRARIES})
 
 # Unity Build: larger batch = fewer compilation units = lower peak RAM per job
