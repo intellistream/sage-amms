@@ -20,13 +20,36 @@ message(STATUS "Found Torch version: ${Torch_VERSION}")
 message(STATUS "Torch libraries: ${TORCH_LIBRARIES}")
 message(STATUS "Torch include directories: ${TORCH_INCLUDE_DIRS}")
 
+# Fallback: if find_package(Torch) succeeded but left TORCH_INCLUDE_DIRS empty,
+# query include paths directly from the Python that is driving this build.
+if(NOT TORCH_INCLUDE_DIRS)
+    message(STATUS "TORCH_INCLUDE_DIRS empty, querying via Python fallback...")
+    if(PYTHON_EXECUTABLE)
+        set(_PY_EXE "${PYTHON_EXECUTABLE}")
+    else()
+        set(_PY_EXE "python3")
+    endif()
+    execute_process(
+        COMMAND "${_PY_EXE}" -c
+            "import torch; print(';'.join(torch.utils.cpp_extension.include_paths()), end='')"
+        OUTPUT_VARIABLE TORCH_INCLUDE_DIRS
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(TORCH_INCLUDE_DIRS)
+        message(STATUS "Torch include dirs (from Python fallback): ${TORCH_INCLUDE_DIRS}")
+    else()
+        message(FATAL_ERROR "Cannot determine torch include dirs. Make sure torch is installed in the build environment.")
+    endif()
+endif()
+
 # Add Torch dependencies
 include_directories(${TORCH_INCLUDE_DIRS})
 set(LIBRARIES ${LIBRARIES} ${TORCH_LIBRARIES})
 
-# Unity Build for faster compilation
+# Unity Build: larger batch = fewer compilation units = lower peak RAM per job
 set(CMAKE_UNITY_BUILD ON)
-set(CMAKE_UNITY_BUILD_BATCH_SIZE 2)
+set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
 message(STATUS "Unity Build enabled with batch size: ${CMAKE_UNITY_BUILD_BATCH_SIZE}")
 
 # C++ Standard and compiler flags
@@ -34,9 +57,9 @@ set(CMAKE_CXX_FLAGS "-std=c++20 -Wall -Werror=return-type -Werror=unused-variabl
 
 # Memory optimization flags (GCC-specific params will be ignored by Clang)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    set(MEMORY_OPTIMIZATION_FLAGS "-g0 -O0 -fno-var-tracking -ftemplate-depth=128 --param ggc-min-expand=20 --param ggc-min-heapsize=32768")
+    set(MEMORY_OPTIMIZATION_FLAGS "-g0 -O0 -fno-var-tracking -ftemplate-depth=128 -fno-inline --param ggc-min-expand=10 --param ggc-min-heapsize=16384 --param large-stack-frame=256")
 else()
-    set(MEMORY_OPTIMIZATION_FLAGS "-g0 -O0 -fno-var-tracking -ftemplate-depth=128")
+    set(MEMORY_OPTIMIZATION_FLAGS "-g0 -O0 -fno-var-tracking -ftemplate-depth=128 -fno-inline")
 endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${MEMORY_OPTIMIZATION_FLAGS} -DNO_RACE_CHECK -DLibAMM_DEBUG_MODE=1")

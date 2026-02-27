@@ -62,11 +62,13 @@ class CMakeBuild(build_ext):
         cmake_args += [f"-DCMAKE_BUILD_TYPE={cfg}"]
 
         # Memory optimization flags
-        if os.environ.get("AMMS_LOW_MEMORY_BUILD", "0") == "1":
+        low_memory = os.environ.get("AMMS_LOW_MEMORY_BUILD", "0") == "1"
+        if low_memory:
+            # Larger Unity batch → fewer compilation units → less peak RAM
             cmake_args += [
-                "-DCMAKE_CXX_FLAGS=-g0 -O0 -fno-var-tracking",
+                "-DCMAKE_CXX_FLAGS=-g0 -O0 -fno-var-tracking -fno-inline",
                 "-DCMAKE_UNITY_BUILD=ON",
-                "-DCMAKE_UNITY_BUILD_BATCH_SIZE=2",
+                "-DCMAKE_UNITY_BUILD_BATCH_SIZE=16",
             ]
 
         # CUDA support
@@ -76,7 +78,16 @@ class CMakeBuild(build_ext):
             cmake_args.append(f"-DCUDACXX={cuda_path}/bin/nvcc")
 
         # Number of parallel jobs
-        max_jobs = os.cpu_count() or 1
+        # AMMS_MAX_JOBS overrides; low-memory mode caps at 2; default is cpu/2
+        cpu_count = os.cpu_count() or 1
+        if "AMMS_MAX_JOBS" in os.environ:
+            max_jobs = max(1, int(os.environ["AMMS_MAX_JOBS"]))
+        elif low_memory:
+            max_jobs = min(cpu_count, 2)
+        else:
+            # Use half the CPUs by default to leave headroom for torch headers
+            max_jobs = max(1, cpu_count // 2)
+        print(f"[isage-amms] parallel jobs: {max_jobs} (low_memory={low_memory})")
         build_args += [f"-j{max_jobs}"]
 
         env = os.environ.copy()
