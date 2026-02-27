@@ -21,9 +21,19 @@ message(STATUS "Torch libraries: ${TORCH_LIBRARIES}")
 message(STATUS "Torch include directories: ${TORCH_INCLUDE_DIRS}")
 
 # Fallback: if find_package(Torch) succeeded but left TORCH_INCLUDE_DIRS empty,
-# query include paths directly from the Python that is driving this build.
+# get them from the 'torch' IMPORTED target's INTERFACE_INCLUDE_DIRECTORIES.
 if(NOT TORCH_INCLUDE_DIRS)
-    message(STATUS "TORCH_INCLUDE_DIRS empty, querying via Python fallback...")
+    if(TARGET torch)
+        get_target_property(TORCH_INCLUDE_DIRS torch INTERFACE_INCLUDE_DIRECTORIES)
+        if(TORCH_INCLUDE_DIRS)
+            message(STATUS "Torch include dirs (from target property): ${TORCH_INCLUDE_DIRS}")
+        endif()
+    endif()
+endif()
+
+# Last resort: query torch's install location directly from Python.
+if(NOT TORCH_INCLUDE_DIRS)
+    message(STATUS "TORCH_INCLUDE_DIRS still empty, querying via Python fallback...")
     if(PYTHON_EXECUTABLE)
         set(_PY_EXE "${PYTHON_EXECUTABLE}")
     else()
