@@ -47,9 +47,10 @@ endif()
 include_directories(SYSTEM ${TORCH_INCLUDE_DIRS})
 set(LIBRARIES ${LIBRARIES} ${TORCH_LIBRARIES})
 
-# Unity Build: larger batch = fewer compilation units = lower peak RAM per job
+# Unity Build: reduces compilation units but batch>2 causes class redefinition
+# errors due to header-defined classes. Keep batch=2; memory savings come from -j2.
 set(CMAKE_UNITY_BUILD ON)
-set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
+set(CMAKE_UNITY_BUILD_BATCH_SIZE 2)
 message(STATUS "Unity Build enabled with batch size: ${CMAKE_UNITY_BUILD_BATCH_SIZE}")
 
 # C++ Standard and compiler flags

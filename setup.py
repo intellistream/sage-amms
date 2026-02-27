@@ -64,11 +64,8 @@ class CMakeBuild(build_ext):
         # Memory optimization flags
         low_memory = os.environ.get("AMMS_LOW_MEMORY_BUILD", "0") == "1"
         if low_memory:
-            # Larger Unity batch → fewer compilation units → less peak RAM
             cmake_args += [
                 "-DCMAKE_CXX_FLAGS=-g0 -O0 -fno-var-tracking -fno-inline",
-                "-DCMAKE_UNITY_BUILD=ON",
-                "-DCMAKE_UNITY_BUILD_BATCH_SIZE=16",
             ]
 
         # CUDA support
