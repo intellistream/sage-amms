@@ -63,7 +63,7 @@ else()
 endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${MEMORY_OPTIMIZATION_FLAGS} -DNO_RACE_CHECK -DLibAMM_DEBUG_MODE=1")
-set(CMAKE_CXX_FLAGS_RELEASE "-Wno-ignored-qualifiers -Wno-sign-compare ${MEMORY_OPTIMIZATION_FLAGS}")
+set(CMAKE_CXX_FLAGS_RELEASE "-Wno-ignored-qualifiers -Wno-sign-compare -Wno-error=unused-parameter ${MEMORY_OPTIMIZATION_FLAGS}")
 
 message(STATUS "CXX flags (Release): ${CMAKE_CXX_FLAGS_RELEASE}")
 
