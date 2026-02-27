@@ -47,10 +47,10 @@ endif()
 include_directories(SYSTEM ${TORCH_INCLUDE_DIRS})
 set(LIBRARIES ${LIBRARIES} ${TORCH_LIBRARIES})
 
-# Unity Build: reduces compilation units but batch>2 causes class redefinition
-# errors due to header-defined classes. Keep batch=2; memory savings come from -j2.
+# Unity Build: larger batch = fewer compilation units = lower peak RAM per job.
+# Table files are excluded below to avoid class redefinition (they include all headers).
 set(CMAKE_UNITY_BUILD ON)
-set(CMAKE_UNITY_BUILD_BATCH_SIZE 2)
+set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
 message(STATUS "Unity Build enabled with batch size: ${CMAKE_UNITY_BUILD_BATCH_SIZE}")
 
 # C++ Standard and compiler flags
@@ -153,10 +153,14 @@ get_headers(LibAMM_HEADER_FILES)
 add_library(LibAMM SHARED ${LibAMM_SOURCE_FILES} ${LibAMM_HEADER_FILES} ${CMAKE_CURRENT_BINARY_DIR})
 set_property(TARGET LibAMM PROPERTY CXX_STANDARD 20)
 
-# Exclude specific files from Unity Build to avoid conflicts
+# Exclude "table" files from Unity Build: they include ALL sub-class headers,
+# so merging them with individual algorithm/loader .cpp files causes class redefinition.
 set_source_files_properties(
     "${PROJECT_SOURCE_DIR}/src/myVecAdd.cpp"
     "${PROJECT_SOURCE_DIR}/src/pythonBoundings.cpp"
+    "${PROJECT_SOURCE_DIR}/src/CPPAlgos/CPPAlgoTable.cpp"
+    "${PROJECT_SOURCE_DIR}/src/MatrixLoader/MatrixLoaderTable.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Utils/Meters/MeterTable.cpp"
     PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE
 )
 
