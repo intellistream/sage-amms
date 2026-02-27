@@ -3,7 +3,7 @@
 // Created by luv on 6/18/23.
 //
 
-#ifndef INTELLISTREAM_FASTFLTCPPALGO_H
+#ifndef INTELLISTREAM_FASTJLTCPPALGO_H
 #define INTELLISTREAM_FASTJLTCPPALGO_H
 
 #include <CPPAlgos/AbstractCPPAlgo.h>
