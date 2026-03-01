@@ -52,6 +52,13 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+full = [
+    "matplotlib>=3.5.0",
+    "pandas>=1.3.0",
+    "scipy>=1.7.0",
+    "torch>=2.0.0",
+]
+
 dev = [
     # dev includes [full] — no need for a separate extras install
     "isage-amms[full]",
@@ -60,17 +67,6 @@ dev = [
     "black>=23.0",
     "ruff>=0.1.0",
     "mypy>=1.0",
-]
-cuda = [
-    "torch>=2.0.0",  # CUDA-enabled PyTorch
-]
-amms = [
-    "isage-amms>=0.1.0",
-]
-full = [
-    "matplotlib>=3.5.0",
-    "pandas>=1.3.0",
-    "scipy>=1.7.0",
 ]
 
 [project.urls]
