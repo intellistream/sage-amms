@@ -12,6 +12,16 @@ from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
 
 
+def _parse_binary_env(name: str, default: str = "0") -> bool:
+    """Parse binary environment toggle with fail-fast validation."""
+    raw_value = os.environ.get(name, default).strip().lower()
+    if raw_value in {"1", "true", "on"}:
+        return True
+    if raw_value in {"0", "false", "off"}:
+        return False
+    raise ValueError(f"{name} must be one of: 0/1/true/false/on/off, got '{raw_value}'")
+
+
 class CMakeExtension(Extension):
     """Extension that uses CMake to build."""
 
@@ -39,21 +49,20 @@ class CMakeBuild(build_ext):
     def build_extension(self, ext):
         """Build a single extension."""
         extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+        try:
+            import torch
+        except ImportError as exc:
+            raise RuntimeError(
+                "PyTorch is required to build isage-amms. Install torch first in the active environment."
+            ) from exc
+
         cmake_args = [
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY={extdir}",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             "-DENABLE_PYBIND=ON",
             "-DENABLE_UNIT_TESTS=OFF",
+            f"-DCMAKE_PREFIX_PATH={torch.utils.cmake_prefix_path}",
         ]
-
-        # Get PyTorch CMake prefix path
-        try:
-            import torch
-
-            torch_path = torch.utils.cmake_prefix_path
-            cmake_args.append(f"-DCMAKE_PREFIX_PATH={torch_path}")
-        except ImportError:
-            print("Warning: PyTorch not found, building without PyTorch support")
 
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
@@ -62,17 +71,26 @@ class CMakeBuild(build_ext):
         cmake_args += [f"-DCMAKE_BUILD_TYPE={cfg}"]
 
         # Memory optimization flags
-        low_memory = os.environ.get("AMMS_LOW_MEMORY_BUILD", "0") == "1"
+        low_memory = _parse_binary_env("AMMS_LOW_MEMORY_BUILD", default="0")
         if low_memory:
             cmake_args += [
                 "-DCMAKE_CXX_FLAGS=-g0 -O0 -fno-var-tracking -fno-inline",
             ]
 
-        # CUDA support
-        if os.environ.get("AMMS_ENABLE_CUDA", "0") == "1":
+        # CUDA support (explicit switch only)
+        enable_cuda = _parse_binary_env("AMMS_ENABLE_CUDA", default="0")
+        if enable_cuda:
             cmake_args.append("-DENABLE_CUDA=ON")
             cuda_path = os.environ.get("CUDA_HOME", "/usr/local/cuda")
+            nvcc_path = Path(cuda_path) / "bin" / "nvcc"
+            if not nvcc_path.exists():
+                raise RuntimeError(
+                    f"AMMS_ENABLE_CUDA=1 but nvcc was not found at {nvcc_path}. "
+                    "Set CUDA_HOME to a valid CUDA toolkit path."
+                )
             cmake_args.append(f"-DCUDACXX={cuda_path}/bin/nvcc")
+        else:
+            cmake_args.append("-DENABLE_CUDA=OFF")
 
         # Number of parallel jobs
         # AMMS_MAX_JOBS overrides; low-memory mode caps at 2; default is cpu/2

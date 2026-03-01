@@ -170,15 +170,23 @@ pip install -e .
 
 # CUDA-enabled build
 AMMS_ENABLE_CUDA=1 pip install -e .
+
+# Explicitly disable CUDA
+AMMS_ENABLE_CUDA=0 pip install -e .
 ```
 
 ### Build Options
 
 #### CUDA Support
 
+`AMMS_ENABLE_CUDA` is an explicit switch. Use `1` to enable CUDA and `0` to force CPU build.
+
 ```bash
 # Enable CUDA
 AMMS_ENABLE_CUDA=1 pip install isage-amms --no-binary :all:
+
+# Force CPU-only build
+AMMS_ENABLE_CUDA=0 pip install isage-amms --no-binary :all:
 
 # Specify CUDA path
 CUDA_HOME=/usr/local/cuda AMMS_ENABLE_CUDA=1 pip install isage-amms --no-binary :all:
@@ -282,6 +290,16 @@ sage-dev benchmark amm --algorithms countsketch,fastjlt --datasets dataset1
 ```
 
 See `packages/sage-benchmark/src/sage/benchmark/benchmark_libamm/README.md` for details.
+
+### Issue #6 regression checks
+
+```bash
+# Build-path matrix + perf baseline regression
+pytest -q tests/test_issue6_build_matrix_and_perf_baseline.py
+
+# CUDA/CPU switch cleanup regression
+pytest -q tests/test_issue5_cuda_cpu_switch_cleanup.py
+```
 
 ## Migration from libamm
 

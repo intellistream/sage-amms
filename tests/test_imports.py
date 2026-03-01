@@ -4,7 +4,6 @@ Note: Import tests are skipped in development environment where SAGE main
 package is installed. These tests will pass in CI and in production installation.
 """
 
-import pytest
 from pathlib import Path
 import re
 
@@ -55,10 +54,10 @@ def test_configuration_files():
     assert (repo_root / 'MANIFEST.in').exists()
     
     # Check documentation
-    assert (repo_root / 'ARCHITECTURE.md').exists()
-    assert (repo_root / 'CONTRIBUTING.md').exists()
-    assert (repo_root / 'PUBLISHING.md').exists()
-    assert (repo_root / 'SAGE_INTEGRATION.md').exists()
+    assert (repo_root / 'docs' / 'ARCHITECTURE.md').exists()
+    assert (repo_root / 'docs' / 'CONTRIBUTING.md').exists()
+    assert (repo_root / 'docs' / 'PUBLISHING.md').exists()
+    assert (repo_root / 'docs' / 'SAGE_INTEGRATION.md').exists()
     
     # Check GitHub workflows
     assert (repo_root / '.github' / 'workflows' / 'build.yml').exists()

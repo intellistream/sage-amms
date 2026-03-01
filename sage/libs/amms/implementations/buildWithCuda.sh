@@ -7,8 +7,7 @@ get_cuda_version() {
         # Use nvcc to extract the version number
         cuda_version=$(/usr/local/cuda/bin/nvcc --version | grep "release" | grep -oP 'release \K[0-9]+\.[0-9]+')
     else
-        echo "CUDA is not installed or nvcc is not in your PATH, try CPU-ONLY."
-        ./buildCPUOnly.sh
+        echo "CUDA is not installed or nvcc is not in your PATH."
         exit 1
     fi
     echo $cuda_version

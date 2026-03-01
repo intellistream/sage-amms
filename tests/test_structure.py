@@ -1,6 +1,5 @@
 """Tests for SAGE-AMMS package content (no imports)."""
 
-import pytest
 from pathlib import Path
 
 
@@ -44,17 +43,17 @@ def test_package_exports():
     
     content = init_file.read_text()
     assert '__version__' in content
-    assert '0.1.0' in content
+    assert '0.1.1' in content
 
 
 def test_build_scripts():
     """Test that build scripts exist."""
     repo_root = Path(__file__).parent.parent
     
-    assert (repo_root / 'build.sh').exists()
-    assert (repo_root / 'test.sh').exists()
+    assert (repo_root / 'scripts' / 'build.sh').exists()
+    assert (repo_root / 'scripts' / 'test.sh').exists()
     
     # Check they're executable
     import os
-    assert os.access(repo_root / 'build.sh', os.X_OK)
-    assert os.access(repo_root / 'test.sh', os.X_OK)
+    assert os.access(repo_root / 'scripts' / 'build.sh', os.X_OK)
+    assert os.access(repo_root / 'scripts' / 'test.sh', os.X_OK)
