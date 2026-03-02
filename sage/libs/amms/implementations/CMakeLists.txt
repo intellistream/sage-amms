@@ -7,6 +7,9 @@ message(STATUS "=== isage_amms Build Configuration ===")
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "CMAKE_CXX_COMPILER: ${CMAKE_CXX_COMPILER}")
 
+option(AMMS_LOW_MEMORY_BUILD "Enable ultra-low-memory compile/link defaults" ON)
+message(STATUS "AMMS_LOW_MEMORY_BUILD: ${AMMS_LOW_MEMORY_BUILD}")
+
 # Custom CMake modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
 include(cmake/macros.cmake)
@@ -57,26 +60,42 @@ endif()
 include_directories(SYSTEM ${TORCH_INCLUDE_DIRS})
 set(LIBRARIES ${LIBRARIES} ${TORCH_LIBRARIES})
 
-# Unity Build: larger batch = fewer compilation units = lower peak RAM per job.
-# Table files are excluded below to avoid class redefinition (they include all headers).
-set(CMAKE_UNITY_BUILD ON)
-set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
-message(STATUS "Unity Build enabled with batch size: ${CMAKE_UNITY_BUILD_BATCH_SIZE}")
+# Unity Build controls
+if(AMMS_LOW_MEMORY_BUILD)
+    set(CMAKE_UNITY_BUILD OFF)
+    message(STATUS "Unity Build: DISABLED (low-memory mode)")
+else()
+    # Table files are excluded below to avoid class redefinition (they include all headers).
+    set(CMAKE_UNITY_BUILD ON)
+    set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
+    message(STATUS "Unity Build: ENABLED with batch size ${CMAKE_UNITY_BUILD_BATCH_SIZE}")
+endif()
 
 # C++ Standard and compiler flags
 set(CMAKE_CXX_FLAGS "-std=c++20 -Wall -Werror=return-type -Werror=unused-variable -Werror=unused-parameter")
 
 # Memory optimization flags (GCC-specific params will be ignored by Clang)
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    set(MEMORY_OPTIMIZATION_FLAGS "-g0 -O0 -fno-var-tracking -ftemplate-depth=128 -fno-inline --param ggc-min-expand=10 --param ggc-min-heapsize=16384 --param large-stack-frame=256")
+if(AMMS_LOW_MEMORY_BUILD)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        set(MEMORY_OPTIMIZATION_FLAGS "-g0 -O0 -fno-var-tracking -ftemplate-depth=128 -fno-inline --param ggc-min-expand=10 --param ggc-min-heapsize=16384 --param large-stack-frame=256")
+    else()
+        set(MEMORY_OPTIMIZATION_FLAGS "-g0 -O0 -fno-var-tracking -ftemplate-depth=128 -fno-inline")
+    endif()
 else()
-    set(MEMORY_OPTIMIZATION_FLAGS "-g0 -O0 -fno-var-tracking -ftemplate-depth=128 -fno-inline")
+    set(MEMORY_OPTIMIZATION_FLAGS "")
 endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${MEMORY_OPTIMIZATION_FLAGS} -DNO_RACE_CHECK -DLibAMM_DEBUG_MODE=1")
 set(CMAKE_CXX_FLAGS_RELEASE "-Wno-ignored-qualifiers -Wno-sign-compare -Wno-error=unused-parameter ${MEMORY_OPTIMIZATION_FLAGS}")
 
 message(STATUS "CXX flags (Release): ${CMAKE_CXX_FLAGS_RELEASE}")
+
+if(AMMS_LOW_MEMORY_BUILD AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-keep-memory -Wl,--reduce-memory-overheads")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-keep-memory -Wl,--reduce-memory-overheads")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-keep-memory -Wl,--reduce-memory-overheads")
+    message(STATUS "Linker low-memory flags enabled for GNU ld")
+endif()
 
 # OpenCL support (optional)
 option(ENABLE_OPENCL "Enable OpenCL support" OFF)

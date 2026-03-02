@@ -53,7 +53,6 @@ find . -type f -name "*.so" -delete 2>/dev/null || true
 echo "✓ Cleaned"
 echo ""
 
-# Set build environment
 if [ "$BUILD_TYPE" = "cuda" ]; then
     echo "Building with CUDA support..."
     export AMMS_ENABLE_CUDA=1
@@ -65,6 +64,8 @@ else
     echo "Building CPU-only version..."
     export AMMS_ENABLE_CUDA=0
 fi
+
+echo "Build mode: auto memory probe (override with AMMS_LOW_MEMORY_BUILD / AMMS_FAST_BUILD / AMMS_MAX_JOBS)"
 
 # Build
 echo ""

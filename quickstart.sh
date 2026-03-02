@@ -52,6 +52,9 @@ echo ""
 echo -e "${YELLOW}${BOLD}Step 2: Installing isage-amms in development mode${NC}"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 
+echo -e "${CYAN}Auto build mode enabled (memory probe in setup.py)${NC}"
+echo -e "${CYAN}Overrides: AMMS_LOW_MEMORY_BUILD=0|1, AMMS_FAST_BUILD=0|1, AMMS_MAX_JOBS=N, AMMS_FAST_BUILD_MEMORY_GB=48${NC}"
+
 pip install -e .
 
 echo ""
