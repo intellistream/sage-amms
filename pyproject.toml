@@ -77,8 +77,12 @@ Repository = "https://github.com/intellistream/sage-amms"
 "Parent Project" = "https://github.com/intellistream/SAGE"
 
 [tool.setuptools]
-packages = { find = { where = ["."], include = ["sage*"] } }
 zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sage.libs.amms*"]
+namespaces = true
 
 [tool.setuptools.package-data]
 "sage.libs.amms" = ["py.typed", "*.so", "*.pyd", "*.dll"]
