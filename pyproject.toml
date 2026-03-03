@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "isage-amms"
-version = "0.1.2"
+version = "0.1.3"
 description = "Approximate Matrix Multiplication algorithms with unified interface"
 readme = "README.md"
 license = { text = "Apache-2.0" }
