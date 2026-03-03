@@ -13,7 +13,9 @@ import pytest
 def test_issue6_build_workflow_has_cpu_cuda_matrix() -> None:
     """CI workflow includes explicit CPU/CUDA build-path matrix coverage."""
     repo_root = Path(__file__).parent.parent
-    workflow_content = (repo_root / ".github" / "workflows" / "build.yml").read_text(encoding="utf-8")
+    workflow_content = (repo_root / ".github" / "workflows" / "build.yml").read_text(
+        encoding="utf-8"
+    )
 
     assert "build_mode: [cpu, cuda]" in workflow_content
     assert "amms_enable_cuda" in workflow_content
