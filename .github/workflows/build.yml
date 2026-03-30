@@ -8,10 +8,19 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Build for Ubuntu 22.04 + Python 3.11 only
+  # Build for Ubuntu 22.04 + Python 3.11 with explicit CPU/CUDA build-path matrix
   build:
-    name: Build (Ubuntu 22.04, Python 3.11)
+    name: Build (${{ matrix.build_mode }}, Ubuntu 22.04, Python 3.11)
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        build_mode: [cpu, cuda]
+        include:
+          - build_mode: cpu
+            amms_enable_cuda: "0"
+          - build_mode: cuda
+            amms_enable_cuda: "1"
 
     steps:
       - name: Checkout code
@@ -34,11 +43,22 @@ jobs:
           pip install torch>=2.0.0 numpy>=1.20.0
           pip install pytest pytest-cov
 
+      - name: Prepare CUDA toolchain switch path
+        if: matrix.build_mode == 'cuda'
+        run: |
+          mkdir -p /tmp/fake-cuda/bin
+          cat > /tmp/fake-cuda/bin/nvcc << 'EOF'
+          #!/usr/bin/env bash
+          echo "fake nvcc for AMMS_ENABLE_CUDA switch validation"
+          EOF
+          chmod +x /tmp/fake-cuda/bin/nvcc
+
       - name: Build package
         run: |
           python -m build --wheel
         env:
-          AMMS_ENABLE_CUDA: "0"
+          AMMS_ENABLE_CUDA: ${{ matrix.amms_enable_cuda }}
+          CUDA_HOME: /tmp/fake-cuda
 
       - name: Install package
         run: |
@@ -58,7 +78,7 @@ jobs:
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
-          name: wheel-ubuntu22.04-py311
+          name: wheel-${{ matrix.build_mode }}-ubuntu22.04-py311
           path: dist/*.whl
 
   # Code quality checks

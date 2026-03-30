@@ -1,3 +1,5 @@
 """Wrappers for AMM algorithm implementations."""
 
-__all__ = []
+from . import pyamm
+
+__all__ = ["pyamm"]

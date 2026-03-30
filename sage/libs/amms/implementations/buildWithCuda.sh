@@ -1,5 +1,12 @@
 #!/bin/bash
 # Please make sure cuda is fully installed at /usr/local/cuda !!!!
+
+set -e
+
+get_mem_available_gib() {
+    awk '/MemAvailable:/ {printf "%.0f", $2/1024/1024}' /proc/meminfo
+}
+
 # Function to get the major and minor version of CUDA using nvcc
 get_cuda_version() {
     # Check if nvcc is available
@@ -7,8 +14,7 @@ get_cuda_version() {
         # Use nvcc to extract the version number
         cuda_version=$(/usr/local/cuda/bin/nvcc --version | grep "release" | grep -oP 'release \K[0-9]+\.[0-9]+')
     else
-        echo "CUDA is not installed or nvcc is not in your PATH, try CPU-ONLY."
-        ./buildCPUOnly.sh
+        echo "CUDA is not installed or nvcc is not in your PATH."
         exit 1
     fi
     echo $cuda_version
@@ -40,16 +46,36 @@ echo "Installing others..."
 sudo apt install -y liblapack-dev libblas-dev
 sudo apt-get install -y graphviz
 sudo apt-get install -y libcudnn8 libcudnn8-dev
-pip install matplotlib pandas==2.0.0
-pip install "torch>=1.13.0"
+python -m pip install matplotlib pandas==2.0.0
+python -m pip install "torch>=1.13.0"
 echo "Build LIBAMM and PyAMM"
 # Step 1: Configure the project
 export CUDACXX=/usr/local/cuda/bin/nvcc
+FAST_BUILD_MEMORY_GB=${AMMS_FAST_BUILD_MEMORY_GB:-48}
+AVAILABLE_GB=$(get_mem_available_gib)
+
+if [ "$AVAILABLE_GB" -ge "$FAST_BUILD_MEMORY_GB" ]; then
+    AMMS_LOW_MEMORY_BUILD=${AMMS_LOW_MEMORY_BUILD:-0}
+else
+    AMMS_LOW_MEMORY_BUILD=${AMMS_LOW_MEMORY_BUILD:-1}
+fi
+
 mkdir build
-cd build &&cmake -DCMAKE_PREFIX_PATH=`python3 -c 'import torch;print(torch.utils.cmake_prefix_path)'` -DENABLE_HDF5=ON -DENABLE_PYBIND=ON -DCMAKE_INSTALL_PREFIX=/usr/local/lib -DENABLE_PAPI=OFF ..
+cd build &&cmake -DCMAKE_PREFIX_PATH=`python3 -c 'import torch;print(torch.utils.cmake_prefix_path)'` -DENABLE_HDF5=ON -DENABLE_PYBIND=ON -DCMAKE_INSTALL_PREFIX=/usr/local/lib -DENABLE_PAPI=OFF -DAMMS_LOW_MEMORY_BUILD=${AMMS_LOW_MEMORY_BUILD} ..
 
-# Step 2: Determine the maximum number of threads
-max_threads=$(nproc)
+# Step 2: Determine threads
+if [ -n "${AMMS_MAX_JOBS}" ]; then
+    max_threads=${AMMS_MAX_JOBS}
+elif [ "$AMMS_LOW_MEMORY_BUILD" = "1" ]; then
+    max_threads=1
+else
+    max_threads=$(( $(nproc) / 2 ))
+    if [ "$max_threads" -lt 1 ]; then
+        max_threads=1
+    fi
+fi
 
-# Step 3: Build the project using the maximum number of threads
+echo "Build mode: AMMS_LOW_MEMORY_BUILD=${AMMS_LOW_MEMORY_BUILD}, MemAvailable=${AVAILABLE_GB}GiB, jobs=${max_threads}"
+
+# Step 3: Build the project
 cmake --build . --parallel $max_threads

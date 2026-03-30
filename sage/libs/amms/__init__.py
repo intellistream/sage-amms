@@ -1,22 +1,12 @@
-"""AMMS - Approximate Matrix Multiplication algorithms.
+"""AMMS package entrypoint.
 
-This package provides Python bindings for C++ AMM algorithm implementations.
-The unified interface should be imported from the main SAGE package.
-
-Example:
-    # In SAGE main repo:
-    from sage.libs.amms import create, registered
-    
-    # This package provides the implementations that get registered
+This package exposes compiled AMM implementations through the wrapper module.
+Backend availability is resolved by explicit imports and fails fast on missing
+compiled extension.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
-# Import wrappers to trigger auto-registration when available
-try:
-    from sage.libs.amms.wrappers import pyamm
-    _has_pyamm = True
-except ImportError:
-    _has_pyamm = False
+from sage.libs.amms.wrappers import pyamm
 
-__all__ = ["__version__"]
+__all__ = ["__version__", "pyamm"]

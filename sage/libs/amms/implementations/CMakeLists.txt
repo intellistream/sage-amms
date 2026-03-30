@@ -7,6 +7,9 @@ message(STATUS "=== isage_amms Build Configuration ===")
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "CMAKE_CXX_COMPILER: ${CMAKE_CXX_COMPILER}")
 
+option(AMMS_LOW_MEMORY_BUILD "Enable ultra-low-memory compile/link defaults" ON)
+message(STATUS "AMMS_LOW_MEMORY_BUILD: ${AMMS_LOW_MEMORY_BUILD}")
+
 # Custom CMake modules
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}")
 include(cmake/macros.cmake)
@@ -20,29 +23,79 @@ message(STATUS "Found Torch version: ${Torch_VERSION}")
 message(STATUS "Torch libraries: ${TORCH_LIBRARIES}")
 message(STATUS "Torch include directories: ${TORCH_INCLUDE_DIRS}")
 
-# Add Torch dependencies
-include_directories(${TORCH_INCLUDE_DIRS})
+# Fallback: if find_package(Torch) succeeded but left TORCH_INCLUDE_DIRS empty,
+# get them from the 'torch' IMPORTED target's INTERFACE_INCLUDE_DIRECTORIES.
+if(NOT TORCH_INCLUDE_DIRS)
+    if(TARGET torch)
+        get_target_property(TORCH_INCLUDE_DIRS torch INTERFACE_INCLUDE_DIRECTORIES)
+        if(TORCH_INCLUDE_DIRS)
+            message(STATUS "Torch include dirs (from target property): ${TORCH_INCLUDE_DIRS}")
+        endif()
+    endif()
+endif()
+
+# Last resort: query torch's install location directly from Python.
+if(NOT TORCH_INCLUDE_DIRS)
+    message(STATUS "TORCH_INCLUDE_DIRS still empty, querying via Python fallback...")
+    if(PYTHON_EXECUTABLE)
+        set(_PY_EXE "${PYTHON_EXECUTABLE}")
+    else()
+        set(_PY_EXE "python3")
+    endif()
+    execute_process(
+        COMMAND "${_PY_EXE}" -c
+            "import torch, os; base=os.path.dirname(torch.__file__); print(base+'/include;'+base+'/include/torch/csrc/api/include', end='')"
+        OUTPUT_VARIABLE TORCH_INCLUDE_DIRS
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    if(TORCH_INCLUDE_DIRS)
+        message(STATUS "Torch include dirs (from Python fallback): ${TORCH_INCLUDE_DIRS}")
+    else()
+        message(FATAL_ERROR "Cannot determine torch include dirs. Make sure torch is installed in the build environment.")
+    endif()
+endif()
+
+# Add Torch dependencies; use SYSTEM to suppress warnings from torch headers
+include_directories(SYSTEM ${TORCH_INCLUDE_DIRS})
 set(LIBRARIES ${LIBRARIES} ${TORCH_LIBRARIES})
 
-# Unity Build for faster compilation
-set(CMAKE_UNITY_BUILD ON)
-set(CMAKE_UNITY_BUILD_BATCH_SIZE 2)
-message(STATUS "Unity Build enabled with batch size: ${CMAKE_UNITY_BUILD_BATCH_SIZE}")
+# Unity Build controls
+if(AMMS_LOW_MEMORY_BUILD)
+    set(CMAKE_UNITY_BUILD OFF)
+    message(STATUS "Unity Build: DISABLED (low-memory mode)")
+else()
+    # Table files are excluded below to avoid class redefinition (they include all headers).
+    set(CMAKE_UNITY_BUILD ON)
+    set(CMAKE_UNITY_BUILD_BATCH_SIZE 16)
+    message(STATUS "Unity Build: ENABLED with batch size ${CMAKE_UNITY_BUILD_BATCH_SIZE}")
+endif()
 
 # C++ Standard and compiler flags
 set(CMAKE_CXX_FLAGS "-std=c++20 -Wall -Werror=return-type -Werror=unused-variable -Werror=unused-parameter")
 
 # Memory optimization flags (GCC-specific params will be ignored by Clang)
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    set(MEMORY_OPTIMIZATION_FLAGS "-g0 -O0 -fno-var-tracking -ftemplate-depth=128 --param ggc-min-expand=20 --param ggc-min-heapsize=32768")
+if(AMMS_LOW_MEMORY_BUILD)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        set(MEMORY_OPTIMIZATION_FLAGS "-g0 -O0 -fno-var-tracking -ftemplate-depth=128 -fno-inline --param ggc-min-expand=10 --param ggc-min-heapsize=16384 --param large-stack-frame=256")
+    else()
+        set(MEMORY_OPTIMIZATION_FLAGS "-g0 -O0 -fno-var-tracking -ftemplate-depth=128 -fno-inline")
+    endif()
 else()
-    set(MEMORY_OPTIMIZATION_FLAGS "-g0 -O0 -fno-var-tracking -ftemplate-depth=128")
+    set(MEMORY_OPTIMIZATION_FLAGS "")
 endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG "${MEMORY_OPTIMIZATION_FLAGS} -DNO_RACE_CHECK -DLibAMM_DEBUG_MODE=1")
-set(CMAKE_CXX_FLAGS_RELEASE "-Wno-ignored-qualifiers -Wno-sign-compare ${MEMORY_OPTIMIZATION_FLAGS}")
+set(CMAKE_CXX_FLAGS_RELEASE "-Wno-ignored-qualifiers -Wno-sign-compare -Wno-error=unused-parameter ${MEMORY_OPTIMIZATION_FLAGS}")
 
 message(STATUS "CXX flags (Release): ${CMAKE_CXX_FLAGS_RELEASE}")
+
+if(AMMS_LOW_MEMORY_BUILD AND CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-keep-memory -Wl,--reduce-memory-overheads")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-keep-memory -Wl,--reduce-memory-overheads")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-keep-memory -Wl,--reduce-memory-overheads")
+    message(STATUS "Linker low-memory flags enabled for GNU ld")
+endif()
 
 # OpenCL support (optional)
 option(ENABLE_OPENCL "Enable OpenCL support" OFF)
@@ -129,10 +182,14 @@ get_headers(LibAMM_HEADER_FILES)
 add_library(LibAMM SHARED ${LibAMM_SOURCE_FILES} ${LibAMM_HEADER_FILES} ${CMAKE_CURRENT_BINARY_DIR})
 set_property(TARGET LibAMM PROPERTY CXX_STANDARD 20)
 
-# Exclude specific files from Unity Build to avoid conflicts
+# Exclude "table" files from Unity Build: they include ALL sub-class headers,
+# so merging them with individual algorithm/loader .cpp files causes class redefinition.
 set_source_files_properties(
     "${PROJECT_SOURCE_DIR}/src/myVecAdd.cpp"
     "${PROJECT_SOURCE_DIR}/src/pythonBoundings.cpp"
+    "${PROJECT_SOURCE_DIR}/src/CPPAlgos/CPPAlgoTable.cpp"
+    "${PROJECT_SOURCE_DIR}/src/MatrixLoader/MatrixLoaderTable.cpp"
+    "${PROJECT_SOURCE_DIR}/src/Utils/Meters/MeterTable.cpp"
     PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE
 )
 

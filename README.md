@@ -170,15 +170,23 @@ pip install -e .
 
 # CUDA-enabled build
 AMMS_ENABLE_CUDA=1 pip install -e .
+
+# Explicitly disable CUDA
+AMMS_ENABLE_CUDA=0 pip install -e .
 ```
 
 ### Build Options
 
 #### CUDA Support
 
+`AMMS_ENABLE_CUDA` is an explicit switch. Use `1` to enable CUDA and `0` to force CPU build.
+
 ```bash
 # Enable CUDA
 AMMS_ENABLE_CUDA=1 pip install isage-amms --no-binary :all:
+
+# Force CPU-only build
+AMMS_ENABLE_CUDA=0 pip install isage-amms --no-binary :all:
 
 # Specify CUDA path
 CUDA_HOME=/usr/local/cuda AMMS_ENABLE_CUDA=1 pip install isage-amms --no-binary :all:
@@ -186,10 +194,32 @@ CUDA_HOME=/usr/local/cuda AMMS_ENABLE_CUDA=1 pip install isage-amms --no-binary 
 
 #### Low Memory Build
 
-For machines with limited RAM:
+Build mode is now selected automatically by memory probe:
+
+- If available memory >= `AMMS_FAST_BUILD_MEMORY_GB` (default `48`), fast build is enabled.
+- Otherwise low-memory mode is enabled to reduce OOM risk.
+
+```bash
+# Default behavior (auto memory probe)
+pip install -e .
+```
+
+You can still set it explicitly:
 
 ```bash
 AMMS_LOW_MEMORY_BUILD=1 pip install isage-amms --no-binary :all:
+```
+
+If you have enough RAM and want faster compilation:
+
+```bash
+AMMS_FAST_BUILD=1 AMMS_MAX_JOBS=4 pip install -e .
+```
+
+Adjust auto fast-build threshold:
+
+```bash
+AMMS_FAST_BUILD_MEMORY_GB=64 pip install -e .
 ```
 instructions.
 
@@ -212,15 +242,18 @@ pip install dist/isage_amms-*.whl
 The build system supports various options:
 
 ```bash
-# Low-memory build (slower but uses less RAM)
+# Low-memory build (default)
 export AMMS_LOW_MEMORY_BUILD=1
+
+# Default parallelism is 1 job in low-memory mode
+export AMMS_MAX_JOBS=1
 
 # Enable CUDA support
 export AMMS_ENABLE_CUDA=1
 export CUDA_HOME=/usr/local/cuda
 
-# Limit parallel jobs
-export CMAKE_BUILD_PARALLEL_LEVEL=2
+# Override parallel jobs when memory is sufficient
+export AMMS_MAX_JOBS=4
 ```
 
 ## Build and Publish to PyPI
@@ -282,6 +315,16 @@ sage-dev benchmark amm --algorithms countsketch,fastjlt --datasets dataset1
 ```
 
 See `packages/sage-benchmark/src/sage/benchmark/benchmark_libamm/README.md` for details.
+
+### Issue #6 regression checks
+
+```bash
+# Build-path matrix + perf baseline regression
+pytest -q tests/test_issue6_build_matrix_and_perf_baseline.py
+
+# CUDA/CPU switch cleanup regression
+pytest -q tests/test_issue5_cuda_cpu_switch_cleanup.py
+```
 
 ## Migration from libamm
 
