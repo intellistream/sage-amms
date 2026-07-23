@@ -9,6 +9,7 @@
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 #include <torch/torch.h>  // Still needed internally for LibAMM
+#include <cstring>
 #include <Utils/ConfigMap.hpp>
 #include <Utils/IntelliLog.h>
 #include <LibAMM.h>
@@ -33,14 +34,6 @@ py::array torch_to_numpy(const torch::Tensor& tensor) {
 
     // Get tensor properties
     auto sizes = cpu_tensor.sizes();
-    auto strides = cpu_tensor.strides();
-
-    // Convert strides from elements to bytes
-    std::vector<ssize_t> np_strides;
-    for (auto s : strides) {
-        np_strides.push_back(s * cpu_tensor.element_size());
-    }
-
     std::vector<ssize_t> np_shape(sizes.begin(), sizes.end());
 
     // Determine NumPy dtype based on torch dtype
@@ -57,9 +50,11 @@ py::array torch_to_numpy(const torch::Tensor& tensor) {
         throw std::runtime_error("Unsupported tensor dtype for NumPy conversion");
     }
 
-    // Create NumPy array sharing the same memory (zero-copy when possible)
-    // Note: We need to keep the tensor alive, so we make a copy for safety
-    return py::array(dtype, np_shape, np_strides, cpu_tensor.data_ptr(), py::cast(cpu_tensor));
+    // Copy into NumPy-owned memory so the result does not depend on a registered
+    // pybind caster or on the lifetime of the temporary tensor.
+    py::array result(dtype, np_shape);
+    std::memcpy(result.mutable_data(), cpu_tensor.data_ptr(), cpu_tensor.nbytes());
+    return result;
 }
 
 // Convert NumPy array to torch::Tensor (LibAMM-facing)

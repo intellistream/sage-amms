@@ -10,17 +10,17 @@ import numpy as np
 import pytest
 
 
-def test_issue6_build_workflow_has_cpu_cuda_matrix() -> None:
-    """CI workflow includes explicit CPU/CUDA build-path matrix coverage."""
+def test_issue6_build_workflow_has_cpu_build_and_cuda_contract() -> None:
+    """CI builds a CPU wheel and validates the explicit CUDA switch contract."""
     repo_root = Path(__file__).parent.parent
     workflow_content = (repo_root / ".github" / "workflows" / "build.yml").read_text(
         encoding="utf-8"
     )
 
-    assert "build_mode: [cpu, cuda]" in workflow_content
-    assert "amms_enable_cuda" in workflow_content
-    assert "AMMS_ENABLE_CUDA: ${{ matrix.amms_enable_cuda }}" in workflow_content
-    assert "Prepare CUDA toolchain switch path" in workflow_content
+    assert "Build (CPU, Ubuntu 22.04, Python 3.11)" in workflow_content
+    assert 'AMMS_ENABLE_CUDA: "0"' in workflow_content
+    assert "cuda-contract:" in workflow_content
+    assert "CUDA build contract" in workflow_content
 
 
 def test_issue6_setup_has_explicit_cuda_cpu_switch_contract() -> None:

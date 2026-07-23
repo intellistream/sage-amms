@@ -8,19 +8,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Build for Ubuntu 22.04 + Python 3.11 with explicit CPU/CUDA build-path matrix
+  # Build the distributable CPU wheel on a standard hosted runner.
   build:
-    name: Build (${{ matrix.build_mode }}, Ubuntu 22.04, Python 3.11)
+    name: Build (CPU, Ubuntu 22.04, Python 3.11)
     runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        build_mode: [cpu, cuda]
-        include:
-          - build_mode: cpu
-            amms_enable_cuda: "0"
-          - build_mode: cuda
-            amms_enable_cuda: "1"
 
     steps:
       - name: Checkout code
@@ -39,26 +30,16 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install build wheel setuptools>=64
-          pip install torch>=2.0.0 numpy>=1.20.0
+          pip install build wheel "setuptools>=64" "cmake>=3.14" "pybind11>=2.10.0"
+          pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install "numpy>=1.20.0"
           pip install pytest pytest-cov
-
-      - name: Prepare CUDA toolchain switch path
-        if: matrix.build_mode == 'cuda'
-        run: |
-          mkdir -p /tmp/fake-cuda/bin
-          cat > /tmp/fake-cuda/bin/nvcc << 'EOF'
-          #!/usr/bin/env bash
-          echo "fake nvcc for AMMS_ENABLE_CUDA switch validation"
-          EOF
-          chmod +x /tmp/fake-cuda/bin/nvcc
 
       - name: Build package
         run: |
-          python -m build --wheel
+          python -m build --wheel --no-isolation
         env:
-          AMMS_ENABLE_CUDA: ${{ matrix.amms_enable_cuda }}
-          CUDA_HOME: /tmp/fake-cuda
+          AMMS_ENABLE_CUDA: "0"
 
       - name: Install package
         run: |
@@ -78,8 +59,27 @@ jobs:
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
-          name: wheel-${{ matrix.build_mode }}-ubuntu22.04-py311
+          name: wheel-cpu-ubuntu22.04-py311
           path: dist/*.whl
+
+  cuda-contract:
+    name: CUDA build contract
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate explicit CUDA switch
+        run: |
+          pip install pytest numpy
+          pytest \
+            tests/test_issue5_cuda_cpu_switch_cleanup.py \
+            tests/test_issue6_build_matrix_and_perf_baseline.py::test_issue6_setup_has_explicit_cuda_cpu_switch_contract
 
   # Code quality checks
   lint:
