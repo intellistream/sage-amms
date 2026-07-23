@@ -17,8 +17,9 @@ include(cmake/default.cmake)
 include(cmake/FindCuda.cmake)
 include(cmake/FindTorch.cmake)
 
-# Find PyTorch
-find_package(Torch REQUIRED)
+# Find PyTorch through the package's official CMake config. Using CONFIG avoids
+# shadowing it with the local hint-only cmake/FindTorch.cmake module.
+find_package(Torch REQUIRED CONFIG)
 message(STATUS "Found Torch version: ${Torch_VERSION}")
 message(STATUS "Torch libraries: ${TORCH_LIBRARIES}")
 message(STATUS "Torch include directories: ${TORCH_INCLUDE_DIRS}")
