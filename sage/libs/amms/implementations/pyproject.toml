@@ -49,9 +49,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/intellistream/LibAMM"
-Repository = "https://github.com/intellistream/LibAMM.git"
-"Bug Tracker" = "https://github.com/intellistream/LibAMM/issues"
+Homepage = "https://github.com/DataSysResearch/AMM-Algorithms"
+Repository = "https://github.com/DataSysResearch/AMM-Algorithms.git"
+"Bug Tracker" = "https://github.com/DataSysResearch/AMM-Algorithms/issues"
 
 # ============================================================================
 # scikit-build-core Configuration

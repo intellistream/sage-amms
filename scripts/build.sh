@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build script for SAGE-AMMS
+# Build script for AMM-Algorithms
 # Usage: ./scripts/build.sh [--cuda] [--verbose]
 
 set -e
@@ -9,7 +9,7 @@ REPO_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
 
 cd "$REPO_ROOT"
 
-echo "=== Building SAGE-AMMS ==="
+echo "=== Building AMM-Algorithms ==="
 echo ""
 
 # Parse arguments

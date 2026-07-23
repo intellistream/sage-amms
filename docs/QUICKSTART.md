@@ -1,14 +1,14 @@
 # Quick Start Guide
 
-This guide helps you quickly get started with developing and publishing SAGE-AMMS.
+This guide helps you quickly get started with developing and publishing AMM-Algorithms.
 
 ## For Developers
 
 ### 1. Clone and Setup
 
 ```bash
-git clone https://github.com/intellistream/sage-amms.git
-cd sage-amms
+git clone https://github.com/DataSysResearch/AMM-Algorithms.git
+cd AMM-Algorithms
 
 # Create virtual environment
 python -m venv venv
@@ -115,7 +115,7 @@ pytest tests/ -v --cov=sage.libs.amms
 
 ### Check CI Status
 
-Visit: https://github.com/intellistream/sage-amms/actions
+Visit: https://github.com/DataSysResearch/AMM-Algorithms/actions
 
 ### Build Locally
 
@@ -166,6 +166,6 @@ pytest tests/test_imports.py::test_import_amms -v
 
 ## Getting Help
 
-- Issues: https://github.com/intellistream/sage-amms/issues
-- Discussions: https://github.com/intellistream/sage-amms/discussions
+- Issues: https://github.com/DataSysResearch/AMM-Algorithms/issues
+- Discussions: https://github.com/DataSysResearch/AMM-Algorithms/discussions
 - Email: shuhao_zhang@hust.edu.cn

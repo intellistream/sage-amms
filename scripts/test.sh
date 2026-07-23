@@ -1,5 +1,5 @@
 #!/bin/bash
-# Quick test script for SAGE-AMMS
+# Quick test script for AMM-Algorithms
 # Usage: ./scripts/test.sh
 
 set -e
@@ -9,7 +9,7 @@ REPO_ROOT="$( cd "$SCRIPT_DIR/.." && pwd )"
 
 cd "$REPO_ROOT"
 
-echo "=== SAGE-AMMS Quick Test ==="
+echo "=== AMM-Algorithms Quick Test ==="
 echo ""
 
 echo "1. Testing imports..."

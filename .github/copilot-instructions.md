@@ -1,4 +1,4 @@
-# sage-amms Copilot Instructions
+# AMM-Algorithms Copilot Instructions
 
 ## Scope
 - Package: `isage-amms`, import path `sage.libs.amms` (legacy: `sage/libs/amms/`).
@@ -6,7 +6,7 @@
 - Purpose: Unified interface for AMM algorithms with optional CUDA acceleration.
 
 ## Polyrepo Context (Important)
-SAGE was restructured from a monorepo into a polyrepo. `sage-amms` is a **standalone L3 C++ extension repo** providing AMM backends. It integrates with `sage-libs` via the `sage.libs.amms` interface layer.
+SAGE was restructured from a monorepo into a polyrepo. `AMM-Algorithms` is a **standalone L3 C++ extension repo** providing AMM backends. It integrates with `sage-libs` via the `sage.libs.amms` interface layer.
 
 ## Critical rules
 - C++ extension built via setuptools + pybind11 + CMake; do not break `CMakeLists.txt`.

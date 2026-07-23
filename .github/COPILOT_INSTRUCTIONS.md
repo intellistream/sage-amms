@@ -1,7 +1,7 @@
-# GitHub Copilot Instructions for sage-amms
+# GitHub Copilot Instructions for AMM-Algorithms
 
 ## Project Context
-- **Repository**: `intellistream/sage-amms`
+- **Repository**: `DataSysResearch/AMM-Algorithms`
 - **PyPI Package**: `isage-amms`
 - **Purpose**: Independent C++ AMM (Approximate Matrix Multiplication) algorithm implementations with PyBind11 bindings
 - **Python Namespace**: `sage.libs.amms`
@@ -34,7 +34,7 @@
 
 ## Directory Structure
 ```
-sage-amms/
+AMM-Algorithms/
 ├── .github/
 │   ├── COPILOT_INSTRUCTIONS.md  # This file
 │   └── workflows/               # CI/CD workflows

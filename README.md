@@ -1,18 +1,22 @@
-# SAGE-AMMS - Approximate Matrix Multiplication Algorithms
+# AMM-Algorithms
 
 [![PyPI version](https://badge.fury.io/py/isage-amms.svg)](https://badge.fury.io/py/isage-amms)
-[![Build Status](https://github.com/intellistream/sage-amms/workflows/Build%20and%20Test/badge.svg)](https://github.com/intellistream/sage-amms/actions)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Build Status](https://github.com/DataSysResearch/AMM-Algorithms/actions/workflows/build.yml/badge.svg)](https://github.com/DataSysResearch/AMM-Algorithms/actions)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-> Independent C++ implementation package for Approximate Matrix Multiplication (AMM) algorithms, extracted from the [SAGE project](https://github.com/intellistream/SAGE).
+> Framework-neutral C++ implementations of Approximate Matrix Multiplication (AMM) algorithms, maintained by [DataSys](https://github.com/DataSysResearch).
 
 **Status**: 🚀 Active Development
 **PyPI Package**: [`isage-amms`](https://pypi.org/project/isage-amms/)
-**Parent Project**: [SAGE - Unified ML System](https://github.com/intellistream/SAGE)
+**Benchmark Suite**: [LibAMM](https://github.com/DataSysResearch/LibAMM)
+
+The distribution name `isage-amms` and Python namespace `sage.libs.amms` remain
+unchanged for backward compatibility. SAGE consumes this library through a thin
+integration layer; the algorithms themselves are maintained as DataSys infrastructure.
 
 ## Overview
 
-SAGE-AMMS provides high-performance C++ implementations of various approximate matrix multiplication algorithms with Python bindings. This package was extracted from the main SAGE repository to:
+AMM-Algorithms provides high-performance C++ implementations of approximate matrix multiplication algorithms with Python bindings. It was extracted from SAGE and graduated through IntelliStream into DataSys to:
 
 - ✅ Enable independent versioning and releases
 - ✅ Reduce main SAGE repository size
@@ -40,8 +44,8 @@ pip install isage-amms
 
 ```bash
 # Clone the repository
-git clone https://github.com/intellistream/sage-amms.git
-cd sage-amms
+git clone https://github.com/DataSysResearch/AMM-Algorithms.git
+cd AMM-Algorithms
 
 # Install in development mode
 pip install -e .
@@ -86,7 +90,7 @@ to how ANNS provides a unified interface for approximate nearest neighbor search
 ## Structure
 
 ```
-sage-amms/
+AMM-Algorithms/
 ├── sage/libs/amms/
 │   ├── __init__.py              # Package initialization
 │   ├── implementations/         # C++ source code
@@ -162,8 +166,8 @@ This installs the **CPU-only version** with all core AMM algorithms.
 
 ```bash
 # Clone repository
-git clone https://github.com/intellistream/sage-amms.git
-cd sage-amms
+git clone https://github.com/DataSysResearch/AMM-Algorithms.git
+cd AMM-Algorithms
 
 # CPU-only build
 pip install -e .

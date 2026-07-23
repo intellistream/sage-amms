@@ -1,4 +1,4 @@
-# Publishing SAGE-AMMS to PyPI
+# Publishing AMM-Algorithms to PyPI
 
 This guide describes how to publish `isage-amms` to PyPI.
 
@@ -15,7 +15,7 @@ This guide describes how to publish `isage-amms` to PyPI.
 3. Configure Trusted Publishing on PyPI (Recommended):
    - Go to PyPI Account Settings → Publishing
    - Add a new publisher for GitHub Actions
-   - Repository: `intellistream/sage-amms`
+   - Repository: `DataSysResearch/AMM-Algorithms`
    - Workflow: `publish.yml`
    - Environment: leave empty or set to `pypi`
 
@@ -59,7 +59,7 @@ git push origin main --tags
 
 3. **Create GitHub Release**
 
-- Go to: https://github.com/intellistream/sage-amms/releases/new
+- Go to: https://github.com/DataSysResearch/AMM-Algorithms/releases/new
 - Tag: `v0.1.0`
 - Title: `Release 0.1.0`
 - Description: Release notes

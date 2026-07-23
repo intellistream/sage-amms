@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-01-09
 
 ### Added
-- Initial release of SAGE-AMMS as independent package
+- Initial release of AMM-Algorithms as independent package
 - Extracted from main SAGE repository
 - C++ implementations of AMM algorithms:
   - Sketching-based: CountSketch, FastJLT, RIP, TugOfWar
@@ -38,5 +38,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build system compatibility across platforms
 - Memory usage during compilation
 
-[Unreleased]: https://github.com/intellistream/sage-amms/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/intellistream/sage-amms/releases/tag/v0.1.0
+[Unreleased]: https://github.com/DataSysResearch/AMM-Algorithms/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/DataSysResearch/AMM-Algorithms/releases/tag/v0.1.0

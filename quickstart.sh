@@ -1,5 +1,5 @@
 #!/bin/bash
-# quickstart.sh - Setup script for sage-amms development
+# quickstart.sh - Setup script for AMM-Algorithms development
 
 set -e
 

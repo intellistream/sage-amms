@@ -1,11 +1,11 @@
-# SAGE-AMMS Architecture
+# AMM-Algorithms Architecture
 
-This document describes the architecture and relationship between `sage-amms` and the main SAGE repository.
+This document describes the architecture and relationship between `AMM-Algorithms` and the main SAGE repository.
 
 ## Repository Structure
 
 ```
-sage-amms/                          # This repository (independent AMM library)
+AMM-Algorithms/                          # This repository (independent AMM library)
 ├── sage/
 │   └── libs/
 │       └── amms/
@@ -33,7 +33,7 @@ sage-amms/                          # This repository (independent AMM library)
 
 ## Architecture Overview
 
-### sage-amms (This Repository)
+### AMM-Algorithms (This Repository)
 
 **Purpose**: Independent C++ AMM algorithm library with Python bindings
 
@@ -88,7 +88,7 @@ except ImportError:
     pass  # isage-amms not installed
 ```
 
-### In sage-amms (This Repo)
+### In AMM-Algorithms (This Repo)
 
 ```python
 # sage/libs/amms/__init__.py (in this repo)
@@ -160,7 +160,7 @@ AMMS_ENABLE_CUDA=1 python -m pip install -e .
 
 ## Dependencies
 
-### sage-amms Dependencies
+### AMM-Algorithms Dependencies
 - numpy>=1.20.0
 - torch>=2.0.0 (for PyTorch integration)
 - Build tools: CMake, C++14 compiler
@@ -173,7 +173,7 @@ amms = ["isage-amms>=0.1.0"]
 
 ## Testing Strategy
 
-### In sage-amms
+### In AMM-Algorithms
 - Test C++ algorithm correctness
 - Test Python bindings work
 - Test installation and imports

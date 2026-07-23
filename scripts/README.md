@@ -1,4 +1,4 @@
-# SAGE-AMMS Scripts
+# AMM-Algorithms Scripts
 
 This directory contains helper scripts for building, testing, and maintaining the project.
 

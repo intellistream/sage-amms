@@ -1,6 +1,6 @@
-# SAGE-AMMS Documentation
+# AMM-Algorithms Documentation
 
-This directory contains comprehensive documentation for the SAGE-AMMS project.
+This directory contains comprehensive documentation for the AMM-Algorithms project.
 
 ## Documentation Files
 

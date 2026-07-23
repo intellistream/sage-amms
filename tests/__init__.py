@@ -1,1 +1,1 @@
-"""Tests for SAGE-AMMS package."""
+"""Tests for AMM-Algorithms package."""

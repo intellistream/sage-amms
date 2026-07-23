@@ -1,4 +1,4 @@
-"""Tests for SAGE-AMMS package content (no imports)."""
+"""Tests for AMM-Algorithms package content (no imports)."""
 
 from pathlib import Path
 

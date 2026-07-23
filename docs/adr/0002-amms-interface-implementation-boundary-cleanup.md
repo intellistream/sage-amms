@@ -2,7 +2,7 @@
 
 - Date: 2026-03-01
 - Status: Accepted
-- Issue: https://github.com/intellistream/sage-amms/issues/4
+- Issue: https://github.com/DataSysResearch/AMM-Algorithms/issues/4
 
 ## Context
 

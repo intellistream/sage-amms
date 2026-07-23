@@ -1,6 +1,6 @@
-# Contributing to SAGE-AMMS
+# Contributing to AMM-Algorithms
 
-Thank you for your interest in contributing to SAGE-AMMS! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to AMM-Algorithms! This document provides guidelines and instructions for contributing.
 
 ## Table of Contents
 
@@ -21,12 +21,12 @@ This project adheres to a code of conduct. By participating, you are expected to
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/sage-amms.git
-   cd sage-amms
+   git clone https://github.com/YOUR_USERNAME/AMM-Algorithms.git
+   cd AMM-Algorithms
    ```
 3. Add upstream remote:
    ```bash
-   git remote add upstream https://github.com/intellistream/sage-amms.git
+   git remote add upstream https://github.com/DataSysResearch/AMM-Algorithms.git
    ```
 
 ## Development Setup
@@ -294,4 +294,4 @@ def test_new_algorithm():
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the Apache License 2.0.
+By contributing, you agree that your contributions will be licensed under the MIT License.
